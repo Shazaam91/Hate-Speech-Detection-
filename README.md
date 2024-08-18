@@ -1,1 +1,1 @@
-Pending Read Me 
+Development of Sinhala Hate Speech Machine Learning Model with the use of Bidirectional Long-short-term memory network to capture the contexts and intricate nuances of the sentences in Sinhalese Language. 
