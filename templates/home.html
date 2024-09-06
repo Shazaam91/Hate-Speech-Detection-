@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Hate Speech Detection{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <img src="{{ url_for('static', filename='dataset-cover.jpg') }}" alt="Hate Speech Detection">
+    <div class="hero-text">
+        <h2>About Hate Speech Detection</h2>
+        <p>
+            The Encyclopedia of the American Constitution states that hate speech is "usually thought to include communications of animosity or disparagement of an individual or a group on account of a group characteristic such as race, color, national origin, sex, disability, religion, or sexual orientation."
+        </p>
+        <h2>වෛර කථන අනාවරණය ගැන</h2>
+        <p>
+            ඇමරිකානු ආණ්ඩුක්‍රම ව්‍යවස්ථාවේ විශ්වකෝෂය පවසන්නේ වෛරී කථනය "සාමාන්‍යයෙන් ජාතිය, වර්ණය, ජාතික සම්භවය, ලිංගය, ආබාධිතභාවය, ආගම හෝ ලිංගිකත්වය වැනි කණ්ඩායම් ලක්ෂණයක් මත පුද්ගලයෙකු හෝ කණ්ඩායමක් එදිරිවාදිකම් හෝ අවමානයට ලක්කිරීමේ සන්නිවේදනයන් ඇතුළත් කිරීමට අදහස් කරන බවයි."
+        </p>
+    </div>
+</div>
+{% endblock %}

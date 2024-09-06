@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My Application{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Hate Speech Detection || වෛරී කථන හඳුනාගැනීම</h1>
+         <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('manage_entries') }}">Manage Entries</a>
+            {% endif %}
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2024 Hate Speech Detection</p>
+    </footer>
+</body>
+</html>
