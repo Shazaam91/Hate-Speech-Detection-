@@ -2,30 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Application{% endblock %}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Hate Speech Detection || වෛරී කථන හඳුනාගැනීම</h1>
-         <nav>
-            <a href="{{ url_for('home') }}">Home</a>
-            {% if session.get('role') == 'admin' %}
-                <a href="{{ url_for('manage_entries') }}">Manage Entries</a>
-            {% endif %}
-            {% if session.get('user_id') %}
-                <a href="{{ url_for('logout') }}">Logout</a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}">Register</a>
-            {% endif %}
-        </nav>
+    <header class="bg-primary text-white p-3">
+        <div class="container">
+            <h1 class="mb-0">Hate Speech Detection || වෛරී කථන හඳුනාගැනීම</h1>
+            <nav class="mt-2">
+                <a class="text-white mr-3" href="{{ url_for('home') }}">Home</a>
+                {% if session.get('role') == 'admin' %}
+                    <a class="text-white mr-3" href="{{ url_for('manage_entries') }}">Manage Entries</a>
+                {% endif %}
+                {% if session.get('user_id') %}
+                    <a class="text-white mr-3" href="{{ url_for('index') }}">Check Hate Speech</a>
+                    <a class="text-white mr-3" href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a class="text-white mr-3" href="{{ url_for('login') }}">Login</a>
+                    <a class="text-white" href="{{ url_for('register') }}">Register</a>
+                {% endif %}
+            </nav>
+        </div>
     </header>
-    <main>
+    <main class="container mt-4">
         {% block content %}{% endblock %}
     </main>
-    <footer>
-        <p>&copy; 2024 Hate Speech Detection</p>
+    <footer class="bg-primary text-center py-3">
+        <p class="mb-0">&copy; 2024 Hate Speech Detection</p>
     </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

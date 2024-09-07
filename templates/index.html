@@ -8,31 +8,44 @@
     <link rel="stylesheet" href="https://unpkg.com/simple-keyboard/build/css/index.css">
     <!-- Include Simple Keyboard JavaScript -->
     <script src="https://unpkg.com/simple-keyboard/build/index.js"></script>
-    <style>
-        /* Custom styles to make the keyboard fit the page */
-        #keyboard {
-            max-width: 600px;
-            margin: 20px auto;
-        }
-    </style>
 </head>
 <body>
-    <h1>Hate Speech Detection</h1>
-    <form method="post">
-        <label for="text">Enter Text:</label>
-        <textarea id="text" name="text" rows="4" required></textarea><br>
-        <input type="submit" value="Check">
-    </form>
+    <header>
+        <h1>Hate Speech Detection</h1>
+    </header>
 
-    {% if text %}
-        <h2>Result</h2>
-        <p><strong>Text:</strong> {{ text }}</p>
-        <p><strong>Label:</strong> {{ label }}</p>
-        <p><strong>Confidence:</strong> {{ confidence }}</p>
-    {% endif %}
+    <main>
+        <!-- Form Section -->
+        <section class="form-section">
+            <div class="form-card">
+                <form method="post">
+                    <div class="form-group">
+                        <label for="text">Enter Text:</label>
+                        <textarea id="text" name="text" rows="6" class="form-control" placeholder="Type or paste your text here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Check</button>
+                </form>
 
-    <!-- Virtual Keyboard Container -->
-    <div id="keyboard" class="simple-keyboard"></div>
+                {% if text %}
+                    <div class="result mt-4">
+                        <h2>Result</h2>
+                        <p><strong>Text:</strong> {{ text }}</p>
+                        <p><strong>Label:</strong> {{ label }}</p>
+                        <p><strong>Confidence:</strong> {{ confidence }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Virtual Keyboard Container -->
+        <section class="keyboard-section">
+            <div id="keyboard" class="simple-keyboard"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Hate Speech Detection</p>
+    </footer>
 
     <script>
         // Initialize Simple Keyboard with full Sinhala layout

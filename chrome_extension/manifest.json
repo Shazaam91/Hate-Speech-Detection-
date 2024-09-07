@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Hate Speech Detection",
+  "version": "1.0",
+  "description": "Detects hate speech using a web-based model.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "128": "icon128.png"
+    }
+  },
+  "permissions": ["storage", "activeTab", "scripting", "http://127.0.0.1:5000/"]
+}

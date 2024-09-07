@@ -1,8 +1,9 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import Flask, request, render_template, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import pickle
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from flask_cors import CORS
 import mysql.connector
 
 # Initialize the Flask app
@@ -40,9 +41,35 @@ def predict_hate_speech(texts, model, tokenizer, max_length=50, threshold=0.4):
         results.append((texts[i], label, confidence))
     return results
 
-@app.route('/home')
+@app.route('/')
 def home():
+    # Redirect to the home page on the initial run
     return render_template('home.html')
+
+@app.route('/index', methods=['GET', 'POST'])
+def index():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        text = request.form['text']
+        results = predict_hate_speech([text], model, tokenizer)
+        result = results[0]
+
+        # Save non-hate speech to the database
+        if result[1] == 'Non-Hate Speech':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO non_hate_speech (user_id, text, confidence) VALUES (%s, %s, %s)",
+                           (session['user_id'], result[0], result[2]))
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+        print(f"Result: {result}")  # Debug: Print result to console
+        return render_template('index.html', text=result[0], label=result[1], confidence=result[2])
+
+    return render_template('index.html', text='', label='', confidence='')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -65,6 +92,7 @@ def register():
             cursor.close()
             conn.close()
     return render_template('register.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -90,8 +118,13 @@ def login():
             session['username'] = user['username']
             session['role'] = user['role']
             flash('Login successful!', 'success')
-            print("Redirecting to index")  # Debug: Confirm redirection
-            return redirect(url_for('index'))
+            print("Redirecting to appropriate page")  # Debug: Confirm redirection
+
+            # Check user role and redirect accordingly
+            if session['role'] == 'admin':
+                return redirect(url_for('home'))  # Redirect admin to the home page
+            else:
+                return redirect(url_for('index'))  # Redirect other users to the index page
         else:
             flash('Invalid username, password, or role', 'danger')
 
@@ -103,8 +136,8 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/submit', methods=['GET', 'POST'])
+def submit():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
