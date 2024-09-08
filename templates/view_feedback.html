@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>View Feedback</h1>
+
+{% if feedback %}
+<table>
+  <thead>
+    <tr>
+      <th>User ID</th>
+      <th>Feedback</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for fb in feedback %}
+    <tr>
+      <td>{{ fb.user_id }}</td>
+      <td>{{ fb.feedback }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No feedback available for this entry.</p>
+{% endif %}
+
+{% endblock %}

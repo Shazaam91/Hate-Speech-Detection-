@@ -6,6 +6,9 @@
     <title>{% block title %}My Application{% endblock %}</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Include Simple Keyboard CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/simple-keyboard/build/css/index.css">
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
     <header class="bg-primary text-white p-3">
@@ -13,7 +16,8 @@
             <h1 class="mb-0">Hate Speech Detection || වෛරී කථන හඳුනාගැනීම</h1>
             <nav class="mt-2">
                 <a class="text-white mr-3" href="{{ url_for('home') }}">Home</a>
-                {% if session.get('role') == 'admin' %}
+                <!-- Show 'Manage Entries' to both admins and users -->
+                {% if session.get('user_id') %}
                     <a class="text-white mr-3" href="{{ url_for('manage_entries') }}">Manage Entries</a>
                 {% endif %}
                 {% if session.get('user_id') %}
@@ -32,8 +36,13 @@
     <footer class="bg-primary text-center py-3">
         <p class="mb-0">&copy; 2024 Hate Speech Detection</p>
     </footer>
+
+    <!-- Include Simple Keyboard JavaScript -->
+    <script src="https://unpkg.com/simple-keyboard/build/index.js"></script>
+    <!-- Include Bootstrap and other necessary scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -4,6 +4,9 @@ import pickle
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from flask_cors import CORS
+from flask import send_file
+import pandas as pd
+from io import BytesIO
 import mysql.connector
 
 # Initialize the Flask app
@@ -82,7 +85,8 @@ def register():
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)", (username, hashed_password, role))
+            cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
+                           (username, hashed_password, role))
             conn.commit()
             flash('Registration successful. Please login.', 'success')
             return redirect(url_for('login'))
@@ -92,7 +96,6 @@ def register():
             cursor.close()
             conn.close()
     return render_template('register.html')
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -108,23 +111,17 @@ def login():
         cursor.close()
         conn.close()
 
-        print(f"User fetched: {user}")  # Debug: Print fetched user
-        if user:
-            print(f"Checking password hash: {user['password']}")
-            print(f"Password provided: {password}")
-
         if user and check_password_hash(user['password'], password) and user['role'] == role:
             session['user_id'] = user['user_id']
             session['username'] = user['username']
             session['role'] = user['role']
             flash('Login successful!', 'success')
-            print("Redirecting to appropriate page")  # Debug: Confirm redirection
 
             # Check user role and redirect accordingly
             if session['role'] == 'admin':
-                return redirect(url_for('home'))  # Redirect admin to the home page
+                return redirect(url_for('home'))
             else:
-                return redirect(url_for('index'))  # Redirect other users to the index page
+                return redirect(url_for('index'))
         else:
             flash('Invalid username, password, or role', 'danger')
 
@@ -161,20 +158,34 @@ def submit():
 
     return render_template('index.html', text='', label='', confidence='')
 
+
 @app.route('/manage_entries', methods=['GET'])
 def manage_entries():
-    if 'user_id' not in session or session['role'] != 'admin':
+    if 'user_id' not in session:
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('login'))
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM non_hate_speech")
+
+    # Fetch entries for admin or particular user
+    if session['role'] == 'admin':
+        cursor.execute("SELECT * FROM non_hate_speech")
+    else:
+        cursor.execute("SELECT * FROM non_hate_speech WHERE user_id = %s", (session['user_id'],))
+
     entries = cursor.fetchall()
+
+    # Fetch feedbacks for admin
+    feedbacks = []
+    if session['role'] == 'admin':
+        cursor.execute("SELECT * FROM feedback")
+        feedbacks = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
-    return render_template('manage_entries.html', entries=entries)
+    return render_template('manage_entries.html', entries=entries, feedbacks=feedbacks)
 
 @app.route('/delete_entry/<int:entry_id>', methods=['GET'])
 def delete_entry(entry_id):
@@ -191,6 +202,73 @@ def delete_entry(entry_id):
 
     flash('Entry deleted successfully.', 'success')
     return redirect(url_for('manage_entries'))
+
+@app.route('/download_entries', methods=['GET'])
+def download_entries():
+    if 'user_id' not in session or session['role'] != 'admin':
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('login'))
+
+    # Connect to the database
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM non_hate_speech")
+    entries = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    # Convert the entries to a pandas DataFrame
+    df = pd.DataFrame(entries)
+
+    # Create a BytesIO object to hold the Excel file in memory
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Non-Hate Speech Entries')
+
+    output.seek(0)
+    return send_file(
+        output,
+        download_name="non_hate_speech_entries.xlsx",
+        as_attachment=True,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+# Add route to handle feedback submission
+@app.route('/submit_feedback', methods=['POST'])
+def submit_feedback():
+    if 'user_id' not in session or session['role'] != 'user':
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('login'))
+
+    entry_id = request.form['entry_id']
+    feedback_text = request.form['feedback_text']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO feedback (entry_id, user_id, feedback_text) VALUES (%s, %s, %s)",
+                   (entry_id, session['user_id'], feedback_text))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Feedback submitted successfully.', 'success')
+    return redirect(url_for('manage_entries'))
+
+# Route for admin to view feedback
+@app.route('/view_feedback/<int:entry_id>', methods=['GET'])
+def view_feedback(entry_id):
+    if 'user_id' not in session or session['role'] != 'admin':
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM feedback WHERE entry_id = %s", (entry_id,))
+    feedbacks = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template('view_feedback.html', feedbacks=feedbacks)
 
 if __name__ == '__main__':
     app.run(debug=True)

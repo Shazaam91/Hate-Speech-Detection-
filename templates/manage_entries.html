@@ -1,34 +1,113 @@
 {% extends 'base.html' %}
 
-{% block title %}Manage Non-Hate Speech Entries{% endblock %}
+{% block title %}Manage Entries{% endblock %}
 
 {% block content %}
 <div class="container mt-0">
-    <h1 class="mb-0">Manage Non-Hate Speech Entries</h1>
+    <h1 class="mb-0">
+        {% if session['role'] == 'admin' %}
+            Manage Non-Hate Speech Entries
+        {% else %}
+            My Non-Hate Speech Entries
+        {% endif %}
+    </h1>
     <table class="table table-striped table-bordered">
         <thead class="thead-dark">
             <tr>
                 <th>ID</th>
-                <th>User ID</th>
                 <th>Text</th>
                 <th>Confidence</th>
+                {% if session['role'] == 'admin' %}
                 <th>Actions</th>
+                <th>Feedback</th>
+                {% else %}
+                <th>Submit Feedback</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
             {% for entry in entries %}
             <tr>
                 <td>{{ entry.entry_id }}</td>
-                <td>{{ entry.user_id }}</td>
                 <td>{{ entry.text }}</td>
                 <td>{{ entry.confidence }}</td>
+                {% if session['role'] == 'admin' %}
                 <td>
-                    <a href="{{ url_for('delete_entry', entry_id=entry.entry_id) }}" class="btn btn-danger btn-sm">Delete</a>
+                    <a href="{{ url_for('delete_entry', entry_id=entry.entry_id) }}" class="btn btn-danger btn-wide">Delete</a>
                 </td>
+                <td>
+                    <!-- Button to open feedback modal -->
+                    <button type="button" class="btn btn-info btn-wide" data-toggle="modal" data-target="#feedbackModal{{ entry.entry_id }}">
+                        View Feedback
+                    </button>
+
+                    <!-- Feedback Modal -->
+                    <div class="modal fade" id="feedbackModal{{ entry.entry_id }}" tabindex="-1" aria-labelledby="feedbackModalLabel{{ entry.entry_id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="feedbackModalLabel{{ entry.entry_id }}">Feedback for Entry {{ entry.entry_id }}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    {% for feedback in feedbacks %}
+                                    {% if feedback.entry_id == entry.entry_id %}
+                                    <p><strong>User {{ feedback.user_id }}:</strong> {{ feedback.feedback_text }}</p>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% if feedbacks|length == 0 %}
+                                    <p>No feedback available for this entry.</p>
+                                    {% endif %}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-wide" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                {% else %}
+                <td>
+                    <!-- Button to open feedback submission modal -->
+                    <button type="button" class="btn btn-primary btn-wide" data-toggle="modal" data-target="#submitFeedbackModal{{ entry.entry_id }}">
+                        Submit Feedback
+                    </button>
+
+                    <!-- Feedback Submission Modal -->
+                    <div class="modal fade" id="submitFeedbackModal{{ entry.entry_id }}" tabindex="-1" aria-labelledby="submitFeedbackModalLabel{{ entry.entry_id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="submitFeedbackModalLabel{{ entry.entry_id }}">Submit Feedback for Entry {{ entry.entry_id }}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form action="{{ url_for('submit_feedback') }}" method="POST">
+                                    <div class="modal-body">
+                                        <input type="hidden" name="entry_id" value="{{ entry.entry_id }}">
+                                        <div class="form-group">
+                                            <textarea name="feedback_text" class="form-control" rows="3" placeholder="Enter your feedback here" required></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-wide" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary btn-wide">Submit Feedback</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('home') }}" class="btn btn-primary">Back to Home</a>
+
+    <a href="{{ url_for('home') }}" class="btn btn-primary btn-wide">Back to Home</a>
 </div>
+
 {% endblock %}

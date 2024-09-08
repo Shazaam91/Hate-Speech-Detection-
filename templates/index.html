@@ -1,91 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Hate Speech Detection</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Include Simple Keyboard CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/simple-keyboard/build/css/index.css">
-    <!-- Include Simple Keyboard JavaScript -->
-    <script src="https://unpkg.com/simple-keyboard/build/index.js"></script>
-</head>
-<body>
-    <header>
-        <h1>Hate Speech Detection</h1>
-    </header>
+{% extends 'base.html' %}
 
-    <main>
-        <!-- Form Section -->
-        <section class="form-section">
-            <div class="form-card">
-                <form method="post">
-                    <div class="form-group">
-                        <label for="text">Enter Text:</label>
-                        <textarea id="text" name="text" rows="6" class="form-control" placeholder="Type or paste your text here..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Check</button>
-                </form>
+{% block title %}Hate Speech Detection{% endblock %}
 
-                {% if text %}
-                    <div class="result mt-4">
-                        <h2>Result</h2>
-                        <p><strong>Text:</strong> {{ text }}</p>
-                        <p><strong>Label:</strong> {{ label }}</p>
-                        <p><strong>Confidence:</strong> {{ confidence }}</p>
-                    </div>
-                {% endif %}
-            </div>
-        </section>
+{% block content %}
+<main>
+    <!-- Form Section -->
+    <section class="form-section">
+        <div class="form-card">
+            <form method="post">
+                <div class="form-group">
+                    <label for="text">Enter Text:</label>
+                    <textarea id="text" name="text" rows="6" class="form-control" placeholder="Type or paste your text here..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Check</button>
+            </form>
 
-        <!-- Virtual Keyboard Container -->
-        <section class="keyboard-section">
-            <div id="keyboard" class="simple-keyboard"></div>
-        </section>
-    </main>
+            {% if text %}
+                <div class="result mt-4">
+                    <h2>Result</h2>
+                    <p><strong>Text:</strong> {{ text }}</p>
+                    <p><strong>Label:</strong> {{ label }}</p>
+                    <p><strong>Confidence:</strong> {{ confidence }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
 
-    <footer>
-        <p>&copy; 2024 Hate Speech Detection</p>
-    </footer>
+    <!-- Virtual Keyboard Container -->
+    <section class="keyboard-section">
+        <div id="keyboard" class="simple-keyboard"></div>
+    </section>
+</main>
 
-    <script>
-        // Initialize Simple Keyboard with full Sinhala layout
-        const keyboard = new SimpleKeyboard.default({
-            onChange: input => onChange(input),
-            onKeyPress: button => onKeyPress(button),
-            layout: {
-                'default': [
-                    '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
-                    'අ ආ ඉ ඊ උ ඌ එ ඒ ඔ ඕ ඖ ඓ ං {enter}',
-                    'ක ඛ ග ඝ ඞ ච ඡ ජ ඣ ඤ ට ඨ ඩ',
-                    'ථ ධ න ණ ප ඵ බ භ ම ය ර ල ව {shift}',
-                    'ශ ෂ ස හ ෆ ළ ් {space}',
-                    'ා ැ ෑ ි ී ු ූ ෙ ේ ෛ ො ෞ'
-                ],
-                'shift': [
-                    '~ ! @ # $ % ^ & * ( ) _ + {bksp}',
-                    'ා ෆ ෳ ෟ ෲ ෴ ර්‍ ළ්‍ {enter}',
-                    'ු ඃ ්්‍ ා ෑ ා ි ී ු ෙ ෛ',
-                    '්‍ ො ෝ ෞ ෂ {shift}',
-                    '{space}'
-                ]
-            },
-            display: {
-                '{bksp}': '⌫',
-                '{enter}': '↵',
-                '{shift}': '⇧',
-                '{space}': ' '
-            },
-            inputTarget: document.getElementById('text')
-        });
+{% endblock %}
 
-        // Functions to handle input change and keypress
-        function onChange(input) {
-            document.getElementById('text').value = input;
-        }
+{% block scripts %}
+<script>
+    // Initialize Simple Keyboard with full Sinhala layout
+    const keyboard = new SimpleKeyboard.default({
+        onChange: input => onChange(input),
+        onKeyPress: button => onKeyPress(button),
+        layout: {
+            'default': [
+                '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
+                'අ ආ ඉ ඊ උ ඌ එ ඒ ඔ ඕ ඖ ඓ ං {enter}',
+                'ක ඛ ග ඝ ඞ ච ඡ ජ ඣ ඤ ට ඨ ඩ',
+                'ථ ධ න ණ ප ඵ බ භ ම ය ර ල ව {shift}',
+                'ශ ෂ ස හ ෆ ළ ් {space}',
+                'ා ැ ෑ ි ී ු ූ ෙ ේ ෛ ො ෞ'
+            ],
+            'shift': [
+                '~ ! @ # $ % ^ & * ( ) _ + {bksp}',
+                'ා ෆ ෳ ෟ ෲ ෴ ර්‍ ළ්‍ {enter}',
+                'ු ඃ ්්‍ ා ෑ ා ි ී ු ෙ ෛ',
+                '්‍ ො ෝ ෞ ෂ {shift}',
+                '{space}'
+            ]
+        },
+        display: {
+            '{bksp}': '⌫',
+            '{enter}': '↵',
+            '{shift}': '⇧',
+            '{space}': ' '
+        },
+        inputTarget: document.getElementById('text')
+    });
 
-        function onKeyPress(button) {
-            console.log('Button pressed', button);
-        }
-    </script>
-</body>
-</html>
+    // Functions to handle input change and keypress
+    function onChange(input) {
+        document.getElementById('text').value = input;
+    }
+
+    function onKeyPress(button) {
+        console.log('Button pressed', button);
+    }
+</script>
+{% endblock %}
