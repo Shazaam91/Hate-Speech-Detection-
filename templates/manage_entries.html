@@ -3,14 +3,15 @@
 {% block title %}Manage Entries{% endblock %}
 
 {% block content %}
-<div class="container mt-0">
-    <h1 class="mb-0">
+<div class="container mt-4">
+    <h1 class="mb-4">
         {% if session['role'] == 'admin' %}
             Manage Non-Hate Speech Entries
         {% else %}
             My Non-Hate Speech Entries
         {% endif %}
     </h1>
+
     <table class="table table-striped table-bordered">
         <thead class="thead-dark">
             <tr>
@@ -33,11 +34,11 @@
                 <td>{{ entry.confidence }}</td>
                 {% if session['role'] == 'admin' %}
                 <td>
-                    <a href="{{ url_for('delete_entry', entry_id=entry.entry_id) }}" class="btn btn-danger btn-wide">Delete</a>
+                    <a href="{{ url_for('delete_entry', entry_id=entry.entry_id) }}" class="btn btn-danger btn-sm">Delete</a>
                 </td>
                 <td>
                     <!-- Button to open feedback modal -->
-                    <button type="button" class="btn btn-info btn-wide" data-toggle="modal" data-target="#feedbackModal{{ entry.entry_id }}">
+                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#feedbackModal{{ entry.entry_id }}">
                         View Feedback
                     </button>
 
@@ -62,7 +63,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary btn-wide" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
                                 </div>
                             </div>
                         </div>
@@ -71,7 +72,7 @@
                 {% else %}
                 <td>
                     <!-- Button to open feedback submission modal -->
-                    <button type="button" class="btn btn-primary btn-wide" data-toggle="modal" data-target="#submitFeedbackModal{{ entry.entry_id }}">
+                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#submitFeedbackModal{{ entry.entry_id }}">
                         Submit Feedback
                     </button>
 
@@ -93,8 +94,8 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary btn-wide" data-dismiss="modal">Close</button>
-                                        <button type="submit" class="btn btn-primary btn-wide">Submit Feedback</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary btn-sm">Submit Feedback</button>
                                     </div>
                                 </form>
                             </div>
@@ -107,7 +108,32 @@
         </tbody>
     </table>
 
-    <a href="{{ url_for('home') }}" class="btn btn-primary btn-wide">Back to Home</a>
+    <!-- Pagination Controls -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('manage_entries', page=page-1) }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('manage_entries', page=p) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+            {% if page < total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('manage_entries', page=page+1) }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <a href="{{ url_for('home') }}" class="btn btn-primary btn-sm">Back to Home</a>
 </div>
 
 {% endblock %}

@@ -9,12 +9,15 @@ import pandas as pd
 from io import BytesIO
 import re
 from collections import Counter
+from flask import render_template, request, redirect, url_for
 import mysql.connector
 
 
 # Initialize the Flask app
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 app.secret_key = 'your_secret_key'  # Replace with a strong secret key, ideally from an environment variable
+
 
 # Configure MySQL connection
 db_config = {
@@ -47,10 +50,32 @@ def predict_hate_speech(texts, model, tokenizer, max_length=50, threshold=0.4):
         results.append((texts[i], label, confidence))
     return results
 
-@app.route('/')
+
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    # Redirect to the home page on the initial run
+    if request.method == 'POST':
+        text = request.form['text']
+        results = predict_hate_speech([text], model, tokenizer)
+        result = results[0]
+
+        return jsonify({
+            'text': result[0],
+            'label': result[1],
+            'confidence': result[2]
+        })
+
     return render_template('home.html')
+
+@app.route('/', methods=['POST'])
+def analyze_text():
+    text = request.form['text']
+    # Your analysis code here
+    response = {
+        'text': text,
+        'label': 'non-hate',  # or 'hate'
+        'confidence': 0.95  # Example confidence value
+    }
+    return jsonify(response)
 
 @app.route('/index', methods=['GET', 'POST'])
 def index():
@@ -171,11 +196,20 @@ def manage_entries():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Fetch entries for admin or particular user
+    # Get the current page number from request args (default to 1)
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Number of entries per page
+    offset = (page - 1) * per_page
+
+    # Fetch total count for pagination
     if session['role'] == 'admin':
-        cursor.execute("SELECT * FROM non_hate_speech")
+        cursor.execute("SELECT COUNT(*) AS total FROM non_hate_speech")
+        total_count = cursor.fetchone()['total']
+        cursor.execute("SELECT * FROM non_hate_speech LIMIT %s OFFSET %s", (per_page, offset))
     else:
-        cursor.execute("SELECT * FROM non_hate_speech WHERE user_id = %s", (session['user_id'],))
+        cursor.execute("SELECT COUNT(*) AS total FROM non_hate_speech WHERE user_id = %s", (session['user_id'],))
+        total_count = cursor.fetchone()['total']
+        cursor.execute("SELECT * FROM non_hate_speech WHERE user_id = %s LIMIT %s OFFSET %s", (session['user_id'], per_page, offset))
 
     entries = cursor.fetchall()
 
@@ -188,7 +222,11 @@ def manage_entries():
     cursor.close()
     conn.close()
 
-    return render_template('manage_entries.html', entries=entries, feedbacks=feedbacks)
+    # Calculate total pages
+    total_pages = (total_count + per_page - 1) // per_page  # Ceiling division
+
+    return render_template('manage_entries.html', entries=entries, feedbacks=feedbacks, page=page, total_pages=total_pages)
+
 
 @app.route('/delete_entry/<int:entry_id>', methods=['GET'])
 def delete_entry(entry_id):
