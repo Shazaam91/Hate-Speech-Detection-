@@ -14,13 +14,13 @@
     <header class="bg-primary text-white p-3">
         <div class="container">
             <h1 class="mb-0">Hate Speech Detection || වෛරී කථන හඳුනාගැනීම</h1>
-            <nav class="mt-2">
+            <nav class="mt-2" role="navigation" aria-label="Main navigation">
                 <a class="text-white mr-3" href="{{ url_for('home') }}">Home</a>
-                <!-- Show 'Manage Entries' to both admins and users -->
                 {% if session.get('user_id') %}
                     <a class="text-white mr-3" href="{{ url_for('manage_entries') }}">Manage Entries</a>
-                {% endif %}
-                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'admin' %}
+                        <a class="text-white mr-3" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                    {% endif %}
                     <a class="text-white mr-3" href="{{ url_for('index') }}">Check Hate Speech</a>
                     <a class="text-white mr-3" href="{{ url_for('logout') }}">Logout</a>
                 {% else %}
@@ -38,11 +38,11 @@
     </footer>
 
     <!-- Include Simple Keyboard JavaScript -->
-    <script src="https://unpkg.com/simple-keyboard/build/index.js"></script>
+    <script src="https://unpkg.com/simple-keyboard/build/index.js" defer></script>
     <!-- Include Bootstrap and other necessary scripts -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" defer></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" defer></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

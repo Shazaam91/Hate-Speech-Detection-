@@ -7,7 +7,10 @@ from flask_cors import CORS
 from flask import send_file
 import pandas as pd
 from io import BytesIO
+import re
+from collections import Counter
 import mysql.connector
+
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -269,6 +272,51 @@ def view_feedback(entry_id):
     conn.close()
 
     return render_template('view_feedback.html', feedbacks=feedbacks)
+
+@app.route('/admin_dashboard', methods=['GET'])
+def admin_dashboard():
+    if 'user_id' not in session or session['role'] != 'admin':
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Get the total number of entries
+    cursor.execute("SELECT COUNT(*) AS total_entries FROM non_hate_speech")
+    total_entries = cursor.fetchone()['total_entries']
+
+    # Get the total number of feedbacks
+    cursor.execute("SELECT COUNT(*) AS total_feedbacks FROM feedback")
+    total_feedbacks = cursor.fetchone()['total_feedbacks']
+
+    # Get the most common words from non_hate_speech entries
+    cursor.execute("SELECT text FROM non_hate_speech")
+    texts = cursor.fetchall()
+    all_texts = ' '.join(text['text'] for text in texts)
+
+    # Use pandas to handle text processing
+    import pandas as pd
+    from collections import Counter
+    import re
+
+    # Basic text processing
+    words = re.findall(r'\b\w+\b', all_texts.lower())
+    word_freq = Counter(words)
+    most_common_words = word_freq.most_common(10)
+
+    # Get the most common feedback types
+    cursor.execute("SELECT feedback_text, COUNT(*) AS count FROM feedback GROUP BY feedback_text ORDER BY count DESC LIMIT 10")
+    feedback_counts = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('admin_dashboard.html', total_entries=total_entries,
+                           total_feedbacks=total_feedbacks, most_common_words=most_common_words,
+                           feedback_counts=feedback_counts)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

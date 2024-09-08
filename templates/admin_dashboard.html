@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Admin Dashboard</h2>
+
+    <div class="row mb-4">
+        <!-- Column 1: Total Entries and Most Common Words -->
+        <div class="col-md-6">
+            <!-- Total Entries Card -->
+            <div class="mb-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-header">Total Entries</div>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ total_entries }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Most Common Words Chart -->
+            <div>
+                <h5 class="text-center">Most Common Words in Entries</h5>
+                <canvas id="wordsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Column 2: Total Feedbacks and Most Common Feedbacks -->
+        <div class="col-md-6">
+            <!-- Total Feedbacks Card -->
+            <div class="mb-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-header">Total Feedbacks</div>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ total_feedbacks }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Most Common Feedbacks Chart -->
+            <div>
+                <h5 class="text-center">Most Common Feedbacks</h5>
+                <canvas id="feedbackChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts to create charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Bar chart for most common words in entries
+        const wordsData = {
+            labels: [{% for word, _ in most_common_words %}'{{ word }}',{% endfor %}],
+            datasets: [{
+                label: 'Word Count',
+                data: [{% for _, count in most_common_words %}{{ count }},{% endfor %}],
+                backgroundColor: '#007bff',
+                borderColor: '#0056b3',
+                borderWidth: 1
+            }]
+        };
+
+        const wordsConfig = {
+            type: 'bar',
+            data: wordsData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Count',
+                            font: {
+                                size: 14
+                            },
+                            color: '#333'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.raw;
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const wordsChart = new Chart(
+            document.getElementById('wordsChart'),
+            wordsConfig
+        );
+
+        // Bar chart for most common feedback insights
+        const feedbackData = {
+            labels: [{% for feedback in feedback_counts %}'{{ feedback.feedback_text }}',{% endfor %}],
+            datasets: [{
+                label: 'Feedback Count',
+                data: [{% for feedback in feedback_counts %}{{ feedback.count }},{% endfor %}],
+                backgroundColor: '#28a745',
+                borderColor: '#1c7430',
+                borderWidth: 1
+            }]
+        };
+
+        const feedbackConfig = {
+            type: 'bar',
+            data: feedbackData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Count',
+                            font: {
+                                size: 14
+                            },
+                            color: '#333'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        };
+
+        const feedbackChart = new Chart(
+            document.getElementById('feedbackChart'),
+            feedbackConfig
+        );
+    </script>
+</div>
+{% endblock %}

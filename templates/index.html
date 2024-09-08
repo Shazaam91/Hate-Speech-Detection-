@@ -36,43 +36,45 @@
 
 {% block scripts %}
 <script>
-    // Initialize Simple Keyboard with full Sinhala layout
-    const keyboard = new SimpleKeyboard.default({
-        onChange: input => onChange(input),
-        onKeyPress: button => onKeyPress(button),
-        layout: {
-            'default': [
-                '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
-                'අ ආ ඉ ඊ උ ඌ එ ඒ ඔ ඕ ඖ ඓ ං {enter}',
-                'ක ඛ ග ඝ ඞ ච ඡ ජ ඣ ඤ ට ඨ ඩ',
-                'ථ ධ න ණ ප ඵ බ භ ම ය ර ල ව {shift}',
-                'ශ ෂ ස හ ෆ ළ ් {space}',
-                'ා ැ ෑ ි ී ු ූ ෙ ේ ෛ ො ෞ'
-            ],
-            'shift': [
-                '~ ! @ # $ % ^ & * ( ) _ + {bksp}',
-                'ා ෆ ෳ ෟ ෲ ෴ ර්‍ ළ්‍ {enter}',
-                'ු ඃ ්්‍ ා ෑ ා ි ී ු ෙ ෛ',
-                '්‍ ො ෝ ෞ ෂ {shift}',
-                '{space}'
-            ]
-        },
-        display: {
-            '{bksp}': '⌫',
-            '{enter}': '↵',
-            '{shift}': '⇧',
-            '{space}': ' '
-        },
-        inputTarget: document.getElementById('text')
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Simple Keyboard with full Sinhala layout
+        const keyboard = new SimpleKeyboard.default({
+            onChange: input => onChange(input),
+            onKeyPress: button => onKeyPress(button),
+            layout: {
+                'default': [
+                    '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
+                    'අ ආ ඉ ඊ උ ඌ එ ඒ ඔ ඕ ඖ ඓ ං {enter}',
+                    'ක ඛ ග ඝ ඞ ච ඡ ජ ඣ ඤ ට ඨ ඩ',
+                    'ථ ධ න ණ ප ඵ බ භ ම ය ර ල ව {shift}',
+                    'ශ ෂ ස හ ෆ ළ ් {space}',
+                    'ා ැ ෑ ි ී ු ූ ෙ ේ ෛ ො ෞ'
+                ],
+                'shift': [
+                    '~ ! @ # $ % ^ & * ( ) _ + {bksp}',
+                    'ා ෆ ෳ ෟ ෲ ෴ ර්‍ ළ්‍ {enter}',
+                    'ු ඃ ්්‍ ා ෑ ා ි ී ු ෙ ෛ',
+                    '්‍ ො ෝ ෞ ෂ {shift}',
+                    '{space}'
+                ]
+            },
+            display: {
+                '{bksp}': '⌫',
+                '{enter}': '↵',
+                '{shift}': '⇧',
+                '{space}': ' '
+            },
+            inputTarget: document.getElementById('text')
+        });
+
+        // Functions to handle input change and keypress
+        function onChange(input) {
+            document.getElementById('text').value = input;
+        }
+
+        function onKeyPress(button) {
+            console.log('Button pressed', button);
+        }
     });
-
-    // Functions to handle input change and keypress
-    function onChange(input) {
-        document.getElementById('text').value = input;
-    }
-
-    function onKeyPress(button) {
-        console.log('Button pressed', button);
-    }
 </script>
 {% endblock %}

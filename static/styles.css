@@ -1,192 +1,203 @@
 /* General Styles */
 body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f2f7fc;
-    color: #333;
+font-family: 'Arial', sans-serif;
+margin: 0;
+padding: 0;
+background-color: #f2f7fc;
+color: #333;
 }
 
 header {
-    background-color: #2a3f54;
-    color: white;
-    padding: 15px 0;
-    text-align: center;
+background-color: #2a3f54;
+color: white;
+padding: 15px 0;
+text-align: center;
 }
 
 header h1 {
-    margin: 0;
-    font-size: 1.6rem;
+margin: 0;
+font-size: 1.6rem;
 }
 
 main {
-    padding: 0; /* Removed padding to ensure full-width hero section */
+padding: 0; /* Removed padding to ensure full-width hero section */
 }
 
 /* Hero Section */
 .hero-section {
-    position: relative;
-    height: 100vh; /* Full viewport height */
-    overflow: hidden;
-    margin: 0; /* Remove any default margin */
+position: relative;
+height: 100vh; /* Full viewport height */
+overflow: hidden;
+margin: 0; /* Remove any default margin */
 }
 
 .hero-image {
-    position: relative;
-    width: 100%;
-    height: 100%;
+position: relative;
+width: 100%;
+height: 100%;
 }
 
 .hero-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Ensures the image covers the container without distortion */
+width: 100%;
+height: 100%;
+object-fit: cover; /* Ensures the image covers the container without distortion */
 }
 
 .hero-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 90%;
-    margin: 0 auto;
-    z-index: 1; /* Ensure text is above the image */
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+color: white;
+background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+padding: 20px;
+border-radius: 8px;
+max-width: 90%;
+margin: 0 auto;
+z-index: 1; /* Ensure text is above the image */
 }
 
 .hero-text h2 {
-    margin-bottom: 20px;
-    font-size: 2.5rem; /* Adjust font size for larger headings */
+margin-bottom: 20px;
+font-size: 2.5rem; /* Adjust font size for larger headings */
 }
 
 .hero-text p {
-    margin-bottom: 20px;
-    font-size: 1.2rem; /* Adjust font size for better readability */
+margin-bottom: 20px;
+font-size: 1.2rem; /* Adjust font size for better readability */
 }
 
 /* Standard Button Size */
 .btn-primary, .btn-danger, .btn-secondary, .btn-info {
-    padding: 10px 20px; /* Base padding for all buttons */
-    border-radius: 4px;
-    font-size: 1rem;
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.3s ease; /* Smooth transition for resizing */
-    white-space: nowrap; /* Prevent text wrapping */
+padding: 10px 20px; /* Base padding for all buttons */
+border-radius: 4px;
+font-size: 1rem;
+color: white;
+text-align: center;
+text-decoration: none;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+border: 1px solid transparent;
+transition: all 0.3s ease; /* Smooth transition for resizing */
+white-space: nowrap; /* Prevent text wrapping */
 }
 
 .btn-primary {
-    background-color: #2682de;
-    border-color: #2682de;
+background-color: #2682de;
+border-color: #2682de;
 }
 
 .btn-primary:hover {
-    background-color: #48a;
-    border-color: #48a;
+background-color: #48a;
+border-color: #48a;
 }
 
 .btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
+background-color: #dc3545;
+border-color: #dc3545;
 }
 
 .btn-danger:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
+background-color: #c82333;
+border-color: #bd2130;
 }
 
 .btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
+background-color: #6c757d;
+border-color: #6c757d;
 }
 
 .btn-secondary:hover {
-    background-color: #5a6268;
-    border-color: #545b62;
+background-color: #5a6268;
+border-color: #545b62;
 }
 
 .btn-info {
-    background-color: #17a2b8;
-    border-color: #17a2b8;
+background-color: #17a2b8;
+border-color: #17a2b8;
 }
 
 .btn-info:hover {
-    background-color: #138496;
-    border-color: #117a8b;
+background-color: #138496;
+border-color: #117a8b;
 }
 
 /* Wide Button Sizes */
 .btn-wide {
-    padding: 10px 24px; /* Increase horizontal padding for wide buttons */
-    min-width: 150px; /* Ensure minimum width for wide buttons */
+padding: 10px 24px; /* Increase horizontal padding for wide buttons */
+min-width: 150px; /* Ensure minimum width for wide buttons */
 }
 
 .btn-primary.btn-wide, .btn-secondary.btn-wide, .btn-danger.btn-wide, .btn-info.btn-wide {
-    min-width: 160px; /* Adjust minimum width as needed for wide buttons */
+min-width: 160px; /* Adjust minimum width as needed for wide buttons */
 }
 
 /* Footer */
 footer {
-    background-color: #2a3f54;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    margin-top: 0; /* Ensure footer is at the bottom of the page */
+background-color: #2a3f54;
+color: white;
+text-align: center;
+padding: 10px;
+margin-top: 0; /* Ensure footer is at the bottom of the page */
 }
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
-    header h1 {
-        font-size: 1.4rem;
-    }
+header h1 {
+font-size: 1.4rem;
+}
 
-    .hero-text h2 {
-        font-size: 2rem; /* Adjust heading size for smaller screens */
-    }
+.hero-text h2 {
+font-size: 2rem; /* Adjust heading size for smaller screens */
+}
 
-    .hero-text p {
-        font-size: 1rem; /* Adjust text size for smaller screens */
-    }
+.hero-text p {
+font-size: 1rem; /* Adjust text size for smaller screens */
+}
 
-    .btn-primary, .btn-danger, .btn-secondary, .btn-info {
-        padding: 8px 16px; /* Slightly smaller padding for smaller screens */
-        font-size: 0.9rem;
-    }
+.btn-primary, .btn-danger, .btn-secondary, .btn-info {
+padding: 8px 16px; /* Slightly smaller padding for smaller screens */
+font-size: 0.9rem;
+}
 
-    .btn-wide {
-        padding: 8px 20px; /* Adjust padding for wide buttons on smaller screens */
-    }
+.btn-wide {
+padding: 8px 20px; /* Adjust padding for wide buttons on smaller screens */
+}
 }
 
 /* Extra Small Devices */
 @media (max-width: 480px) {
-    header h1 {
-        font-size: 1.2rem;
-    }
+header h1 {
+font-size: 1.2rem;
+}
 
-    .hero-text h2 {
-        font-size: 1.5rem; /* Further adjust heading size */
-    }
+.hero-text h2 {
+font-size: 1.5rem; /* Further adjust heading size */
+}
 
-    .hero-text p {
-        font-size: 0.9rem; /* Further adjust text size */
-    }
+.hero-text p {
+font-size: 0.9rem; /* Further adjust text size */
+}
 
-    .btn-primary, .btn-danger, .btn-secondary, .btn-info {
-        padding: 6px 12px; /* Further reduce padding for very small screens */
-        font-size: 0.8rem;
-    }
+.btn-primary, .btn-danger, .btn-secondary, .btn-info {
+padding: 6px 12px; /* Further reduce padding for very small screens */
+font-size: 0.8rem;
+}
 
-    .btn-wide {
-        padding: 6px 16px; /* Adjust padding for wide buttons on very small screens */
-    }
+.btn-wide {
+padding: 6px 16px; /* Adjust padding for wide buttons on very small screens */
+}
+/* Ensure the keyboard section is visible */
+.keyboard-section {
+margin-top: 20px;
+}
+
+/* Adjust size of the keyboard container */
+#keyboard {
+width: 100%;
+margin: auto;
+}
+
 }
