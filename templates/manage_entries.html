@@ -12,6 +12,11 @@
         {% endif %}
     </h1>
 
+    <!-- Download CSV Button (Visible only to Admin) -->
+    {% if session['role'] == 'admin' %}
+    <a href="{{ url_for('download_manage_entries_csv') }}" class="btn btn-success mb-3">Download as CSV</a>
+    {% endif %}
+
     <table class="table table-striped table-bordered">
         <thead class="thead-dark">
             <tr>

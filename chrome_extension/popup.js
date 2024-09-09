@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        fetch('http://127.0.0.1:5000/', {
+        fetch('http://127.0.0.1:5000/analyze_text', { // Make sure the URL matches your backend endpoint
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -20,11 +20,15 @@ document.addEventListener('DOMContentLoaded', function () {
             })
         })
         .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
+            if (response.status === 401) {
+                // If the user is not logged in, show a login prompt
+                document.getElementById('result').innerHTML = '<p>You need to log in to analyze the text. Please log in and try again.</p>';
+                throw new Error('Unauthorized access.');
+            } else if (!response.ok) {
+                // Handle other non-OK responses
                 return response.text().then(text => { throw new Error(text); });
             }
+            return response.json();
         })
         .then(data => {
             const resultDiv = document.getElementById('result');
@@ -33,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 resultDiv.innerHTML = `
                     <p><strong>Text:</strong> ${text}</p>
                     <p><strong>Label:</strong> ${label}</p>
-                    <p><strong>Confidence:</strong> ${confidence.toFixed(2) * 100}%</p>
+                    <p><strong>Confidence:</strong> ${(confidence * 100).toFixed(2)}%</p>
                 `;
             } else {
                 resultDiv.innerHTML = '<p>No results found.</p>';
@@ -41,7 +45,9 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('result').innerHTML = '<p>Failed to analyze text. Please try again later.</p>';
+            if (error.message !== 'Unauthorized access.') {
+                document.getElementById('result').innerHTML = '<p>Failed to analyze text. Please try again later.</p>';
+            }
         });
     });
 });

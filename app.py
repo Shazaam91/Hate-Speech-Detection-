@@ -10,6 +10,11 @@ from io import BytesIO
 import re
 from collections import Counter
 from flask import render_template, request, redirect, url_for
+from flask import make_response
+import csv
+from io import StringIO
+from flask import Response
+from functools import wraps
 import mysql.connector
 
 
@@ -36,6 +41,17 @@ def get_db_connection():
 model = load_model('hate_speech_model.keras')
 with open('tokenizer.pkl', 'rb') as file:
     tokenizer = pickle.load(file)
+
+from functools import wraps
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'error': 'Unauthorized access. Please log in.'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # Prediction function
 def predict_hate_speech(texts, model, tokenizer, max_length=50, threshold=0.4):
@@ -66,16 +82,37 @@ def home():
 
     return render_template('home.html')
 
-@app.route('/', methods=['POST'])
+@app.route('/analyze_text', methods=['POST'])
 def analyze_text():
+    # Check if the user is logged in
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized access. Please log in.'}), 401
+
     text = request.form['text']
-    # Your analysis code here
+    results = predict_hate_speech([text], model, tokenizer)
+    result = results[0]
+
     response = {
-        'text': text,
-        'label': 'non-hate',  # or 'hate'
-        'confidence': 0.95  # Example confidence value
+        'text': result[0],
+        'label': result[1],
+        'confidence': result[2]
     }
     return jsonify(response)
+
+@app.route('/analyze_text_get', methods=['POST'])
+@login_required
+def analyze_text_get():
+    text = request.form['text']
+    results = predict_hate_speech([text], model, tokenizer)
+    result = results[0]
+
+    response = {
+        'text': result[0],
+        'label': result[1],
+        'confidence': result[2]
+    }
+    return jsonify(response)
+
 
 @app.route('/index', methods=['GET', 'POST'])
 def index():
@@ -187,6 +224,7 @@ def submit():
     return render_template('index.html', text='', label='', confidence='')
 
 
+
 @app.route('/manage_entries', methods=['GET'])
 def manage_entries():
     if 'user_id' not in session:
@@ -227,7 +265,6 @@ def manage_entries():
 
     return render_template('manage_entries.html', entries=entries, feedbacks=feedbacks, page=page, total_pages=total_pages)
 
-
 @app.route('/delete_entry/<int:entry_id>', methods=['GET'])
 def delete_entry(entry_id):
     if 'user_id' not in session or session['role'] != 'admin':
@@ -244,35 +281,6 @@ def delete_entry(entry_id):
     flash('Entry deleted successfully.', 'success')
     return redirect(url_for('manage_entries'))
 
-@app.route('/download_entries', methods=['GET'])
-def download_entries():
-    if 'user_id' not in session or session['role'] != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM non_hate_speech")
-    entries = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    # Convert the entries to a pandas DataFrame
-    df = pd.DataFrame(entries)
-
-    # Create a BytesIO object to hold the Excel file in memory
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Non-Hate Speech Entries')
-
-    output.seek(0)
-    return send_file(
-        output,
-        download_name="non_hate_speech_entries.xlsx",
-        as_attachment=True,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
 
 # Add route to handle feedback submission
 @app.route('/submit_feedback', methods=['POST'])
@@ -354,7 +362,100 @@ def admin_dashboard():
                            total_feedbacks=total_feedbacks, most_common_words=most_common_words,
                            feedback_counts=feedback_counts)
 
+@app.route('/download_dashboard_report_csv', methods=['GET'])
+def download_dashboard_report_csv():
+    """Route for downloading the dashboard report as a CSV file."""
+    if 'user_id' not in session or session['role'] != 'admin':
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('login'))
 
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Get the most common words from non_hate_speech entries
+    cursor.execute("SELECT text FROM non_hate_speech")
+    texts = cursor.fetchall()
+    all_texts = ' '.join(text['text'] for text in texts)
+
+    # Basic text processing
+    words = re.findall(r'\b\w+\b', all_texts.lower())
+    word_freq = Counter(words)
+    most_common_words = word_freq.most_common(10)
+
+    # Get the most common feedback types
+    cursor.execute("SELECT feedback_text, COUNT(*) AS count FROM feedback GROUP BY feedback_text ORDER BY count DESC LIMIT 10")
+    feedback_counts = cursor.fetchall()
+
+    # Get total entries and non-hate speech entries
+    cursor.execute("SELECT COUNT(*) AS total_entries FROM non_hate_speech")
+    total_entries = cursor.fetchone()['total_entries']
+
+    cursor.execute("SELECT COUNT(*) AS non_hate_speech_entries FROM non_hate_speech")
+    non_hate_speech_entries = cursor.fetchone()['non_hate_speech_entries']
+
+    cursor.close()
+    conn.close()
+
+    # Convert data to DataFrames
+    word_freq_df = pd.DataFrame(most_common_words, columns=['Word', 'Frequency'])
+    feedback_counts_df = pd.DataFrame(feedback_counts)
+    summary_df = pd.DataFrame({
+        'Total Entries': [total_entries],
+        'Non-Hate Speech Entries': [non_hate_speech_entries]
+    })
+
+    # Concatenate DataFrames into a single DataFrame
+    final_df = pd.concat([summary_df, word_freq_df, feedback_counts_df], axis=1)
+
+    # Convert the DataFrame to CSV format
+    csv_output = final_df.to_csv(index=False)
+
+    # Prepare the response for downloading
+    response = make_response(csv_output)
+    response.headers["Content-Disposition"] = "attachment; filename=dashboard_report.csv"
+    response.headers["Content-Type"] = "text/csv"
+
+    return response
+
+
+# Route for downloading manage_entries data as CSV
+@app.route('/download_manage_entries_csv', methods=['GET'])
+def download_manage_entries_csv():
+    if 'user_id' not in session:
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch entries based on user role
+    if session['role'] == 'admin':
+        cursor.execute("SELECT * FROM non_hate_speech")
+    else:
+        cursor.execute("SELECT * FROM non_hate_speech WHERE user_id = %s", (session['user_id'],))
+
+    entries = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    # Create CSV file in memory
+    si = StringIO()
+    writer = csv.writer(si)
+
+    # Write header
+    if entries:
+        writer.writerow(entries[0].keys())  # header row
+
+    # Write data rows
+    for entry in entries:
+        writer.writerow(entry.values())
+
+    # Prepare response
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=manage_entries.csv"
+    output.headers["Content-type"] = "text/csv"
+
+    return output
 
 if __name__ == '__main__':
     app.run(debug=True)

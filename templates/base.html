@@ -9,31 +9,51 @@
     <!-- Include Simple Keyboard CSS -->
     <link rel="stylesheet" href="https://unpkg.com/simple-keyboard/build/css/index.css">
     {% block extra_head %}{% endblock %}
+    <style>
+        /* Custom style to handle logo and header content alignment */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .header-logo {
+            position: absolute;
+            left: 0;
+        }
+        .header-content {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <header class="bg-primary text-white p-3">
-        <div class="container">
-            <h1 class="mb-0">Hate Speech Detection || වෛරී කථන හඳුනාගැනීම</h1>
-            <nav class="mt-2" role="navigation" aria-label="Main navigation">
-                <a class="text-white mr-3" href="{{ url_for('home') }}">Home</a>
-                {% if session.get('user_id') %}
-                    <a class="text-white mr-3" href="{{ url_for('manage_entries') }}">Manage Entries</a>
-                    {% if session.get('role') == 'admin' %}
-                        <a class="text-white mr-3" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+    <header style="background-color: #def2f1; color: #333;" class="p-3">
+        <div class="container header-container">
+            <!-- Logo -->
+            <img src="{{ url_for('static', filename='icon128.png') }}" alt="Logo" class="header-logo" style="width: 50px; height: auto; margin-right: 15px;">
+            <div class="header-content">
+                <h1 class="mb-0">Hate Speech Detection || වෛරී කථන හඳුනාගැනීම</h1>
+                <nav class="mt-2" role="navigation" aria-label="Main navigation">
+                    <a class="text-dark mr-3" href="{{ url_for('home') }}">Home</a>
+                    {% if session.get('user_id') %}
+                        <a class="text-dark mr-3" href="{{ url_for('manage_entries') }}">Manage Entries</a>
+                        {% if session.get('role') == 'admin' %}
+                            <a class="text-dark mr-3" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                        {% endif %}
+                        <a class="text-dark mr-3" href="{{ url_for('index') }}">Check Hate Speech</a>
+                        <a class="text-dark mr-3" href="{{ url_for('logout') }}">Logout</a>
+                    {% else %}
+                        <a class="text-dark mr-3" href="{{ url_for('login') }}">Login</a>
+                        <a class="text-dark" href="{{ url_for('register') }}">Register</a>
                     {% endif %}
-                    <a class="text-white mr-3" href="{{ url_for('index') }}">Check Hate Speech</a>
-                    <a class="text-white mr-3" href="{{ url_for('logout') }}">Logout</a>
-                {% else %}
-                    <a class="text-white mr-3" href="{{ url_for('login') }}">Login</a>
-                    <a class="text-white" href="{{ url_for('register') }}">Register</a>
-                {% endif %}
-            </nav>
+                </nav>
+            </div>
         </div>
     </header>
     <main class="container mt-4">
         {% block content %}{% endblock %}
     </main>
-    <footer class="bg-primary text-center py-3">
+    <footer style="background-color: #def2f1; color: #333;" class="text-center py-3">
         <p class="mb-0">&copy; 2024 || Sinhala Hate Speech Detection</p>
     </footer>
 

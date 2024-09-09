@@ -46,8 +46,15 @@
         </div>
     </div>
 
-    <!-- Scripts to create charts -->
+    <!-- Unified Download Button -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('download_dashboard_report_csv') }}" class="btn btn-outline-info btn-lg">Download Dashboard Report CSV</a>
+    </div>
+
+    <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Scripts to create charts -->
     <script>
         // Bar chart for most common words in entries
         const wordsData = {
