@@ -179,41 +179,11 @@ def admin():
     return render_template('admin.html', entries=flagged_entries)
 
 
-import re
-
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        confirm_password = request.form['confirm_password']
-
-        # Validate password
-        if len(password) < 8:
-            flash('Password must be at least 8 characters long.', 'danger')
-            return render_template('register.html')
-
-        if not re.search(r'[A-Z]', password):
-            flash('Password must contain at least one uppercase letter.', 'danger')
-            return render_template('register.html')
-
-        if not re.search(r'[a-z]', password):
-            flash('Password must contain at least one lowercase letter.', 'danger')
-            return render_template('register.html')
-
-        if not re.search(r'[0-9]', password):
-            flash('Password must contain at least one digit.', 'danger')
-            return render_template('register.html')
-
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-            flash('Password must contain at least one special character.', 'danger')
-            return render_template('register.html')
-
-        if password != confirm_password:
-            flash('Passwords do not match.', 'danger')
-            return render_template('register.html')
-
         hashed_password = generate_password_hash(password)
         role = 'user'  # Default role is 'user'
 
@@ -231,7 +201,6 @@ def register():
             cursor.close()
             conn.close()
     return render_template('register.html')
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -262,7 +231,6 @@ def login():
             flash('Invalid username, password, or role', 'danger')
 
     return render_template('login.html')
-
 
 @app.route('/logout')
 def logout():
