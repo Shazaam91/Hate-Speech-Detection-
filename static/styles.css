@@ -25,46 +25,34 @@ padding: 0; /* Removed padding to ensure full-width hero section */
 
 /* Hero Section */
 .hero-section {
-position: relative;
-height: 100vh; /* Full viewport height */
-overflow: hidden;
-margin: 0; /* Remove any default margin */
-}
-
-.hero-image {
-position: relative;
-width: 100%;
-height: 100%;
-}
-
-.hero-image img {
-width: 100%;
-height: 100%;
-object-fit: cover; /* Ensures the image covers the container without distortion */
+    position: relative;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden;
+    margin: 0; /* Remove any default margin */
 }
 
 .hero-text {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-color: white;
-background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-padding: 20px;
-border-radius: 8px;
-max-width: 90%;
-margin: 0 auto;
-z-index: 1; /* Ensure text is above the image */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: black; /* Set text color to black */
+    background: none; /* Remove background */
+    padding: 20px; /* Add padding around the text */
+    border-radius: 0; /* Remove border radius */
+    max-width: 90%; /* Control maximum width */
+    margin: 0 auto;
+    z-index: 1; /* Ensure text is above other elements */
 }
 
 .hero-text h2 {
-margin-bottom: 20px;
-font-size: 2.5rem; /* Adjust font size for larger headings */
+    margin-bottom: 20px;
+    font-size: 2.5rem; /* Adjust font size for larger headings */
 }
 
 .hero-text p {
-margin-bottom: 20px;
-font-size: 1.2rem; /* Adjust font size for better readability */
+    margin-bottom: 20px;
+    font-size: 1.2rem; /* Adjust font size for better readability */
 }
 
 /* Standard Button Size */

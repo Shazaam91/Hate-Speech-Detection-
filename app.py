@@ -21,7 +21,7 @@ import mysql.connector
 # Initialize the Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-app.secret_key = 'your_secret_key'  # Replace with a strong secret key, ideally from an environment variable
+app.secret_key = 'my_secret_key'
 
 
 # Configure MySQL connection
@@ -65,6 +65,20 @@ def predict_hate_speech(texts, model, tokenizer, max_length=50, threshold=0.4):
         confidence = float(prediction)
         results.append((texts[i], label, confidence))
     return results
+
+
+def check_if_user_is_admin(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Check if the user has the role of 'admin'
+    cursor.execute("SELECT role FROM users WHERE user_id = %s", (user_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if result and result[0] == 'admin':  # Assuming 'roles' is the first column returned
+        return True
+    return False
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -114,36 +128,92 @@ def analyze_text_get():
     return jsonify(response)
 
 
+
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+
+    is_admin = check_if_user_is_admin(session['user_id'])
 
     if request.method == 'POST':
         text = request.form['text']
         results = predict_hate_speech([text], model, tokenizer)
         result = results[0]
 
-        # Save non-hate speech to the database
-        if result[1] == 'Non-Hate Speech':
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO non_hate_speech (user_id, text, confidence) VALUES (%s, %s, %s)",
-                           (session['user_id'], result[0], result[2]))
-            conn.commit()
-            cursor.close()
-            conn.close()
+        # Determine if the speech is hate or non-hate
+        is_hate_speech = (result[1] == 'Hate Speech')
 
-        print(f"Result: {result}")  # Debug: Print result to console
+        # Save the entry to the database, marking it as hate speech if necessary
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO non_hate_speech (user_id, text, confidence, hate_speech_flagged) 
+            VALUES (%s, %s, %s, %s)
+        """, (session['user_id'], result[0], result[2], is_hate_speech))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        # Show an alert for admin users if the result is hate speech
+        if is_admin and is_hate_speech:
+            flash('Hate Speech detected: Admin has been alerted.', 'danger')
+
         return render_template('index.html', text=result[0], label=result[1], confidence=result[2])
 
     return render_template('index.html', text='', label='', confidence='')
+
+@app.route('/admin')
+def admin():
+    if 'user_id' not in session or not check_if_user_is_admin(session['user_id']):
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Fetch all hate speech entries for admin review
+    cursor.execute("SELECT * FROM non_hate_speech WHERE hate_speech_flagged = TRUE")
+    flagged_entries = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template('admin.html', entries=flagged_entries)
+
+
+import re
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        # Validate password
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long.', 'danger')
+            return render_template('register.html')
+
+        if not re.search(r'[A-Z]', password):
+            flash('Password must contain at least one uppercase letter.', 'danger')
+            return render_template('register.html')
+
+        if not re.search(r'[a-z]', password):
+            flash('Password must contain at least one lowercase letter.', 'danger')
+            return render_template('register.html')
+
+        if not re.search(r'[0-9]', password):
+            flash('Password must contain at least one digit.', 'danger')
+            return render_template('register.html')
+
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            flash('Password must contain at least one special character.', 'danger')
+            return render_template('register.html')
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('register.html')
+
         hashed_password = generate_password_hash(password)
         role = 'user'  # Default role is 'user'
 
@@ -161,6 +231,7 @@ def register():
             cursor.close()
             conn.close()
     return render_template('register.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -191,6 +262,7 @@ def login():
             flash('Invalid username, password, or role', 'danger')
 
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -243,11 +315,11 @@ def manage_entries():
     if session['role'] == 'admin':
         cursor.execute("SELECT COUNT(*) AS total FROM non_hate_speech")
         total_count = cursor.fetchone()['total']
-        cursor.execute("SELECT * FROM non_hate_speech LIMIT %s OFFSET %s", (per_page, offset))
+        cursor.execute("SELECT entry_id, text, confidence, hate_speech_flagged FROM non_hate_speech LIMIT %s OFFSET %s", (per_page, offset))
     else:
         cursor.execute("SELECT COUNT(*) AS total FROM non_hate_speech WHERE user_id = %s", (session['user_id'],))
         total_count = cursor.fetchone()['total']
-        cursor.execute("SELECT * FROM non_hate_speech WHERE user_id = %s LIMIT %s OFFSET %s", (session['user_id'], per_page, offset))
+        cursor.execute("SELECT entry_id, text, confidence FROM non_hate_speech WHERE user_id = %s LIMIT %s OFFSET %s", (session['user_id'], per_page, offset))
 
     entries = cursor.fetchall()
 
@@ -264,6 +336,7 @@ def manage_entries():
     total_pages = (total_count + per_page - 1) // per_page  # Ceiling division
 
     return render_template('manage_entries.html', entries=entries, feedbacks=feedbacks, page=page, total_pages=total_pages)
+
 
 @app.route('/delete_entry/<int:entry_id>', methods=['GET'])
 def delete_entry(entry_id):
@@ -442,7 +515,7 @@ def download_manage_entries_csv():
     si = StringIO()
     writer = csv.writer(si)
 
-    # Write header
+    # Write headera
     if entries:
         writer.writerow(entries[0].keys())  # header row
 

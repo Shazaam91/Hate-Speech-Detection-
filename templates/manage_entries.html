@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <h1 class="mb-4">
         {% if session['role'] == 'admin' %}
-            Manage Non-Hate Speech Entries
+            Manage Entries
         {% else %}
             My Non-Hate Speech Entries
         {% endif %}
@@ -24,6 +24,7 @@
                 <th>Text</th>
                 <th>Confidence</th>
                 {% if session['role'] == 'admin' %}
+                <th>Hate Speech Flagged</th>
                 <th>Actions</th>
                 <th>Feedback</th>
                 {% else %}
@@ -38,6 +39,7 @@
                 <td>{{ entry.text }}</td>
                 <td>{{ entry.confidence }}</td>
                 {% if session['role'] == 'admin' %}
+                <td>{{ 'Yes' if entry.hate_speech_flagged else 'No' }}</td>
                 <td>
                     <a href="{{ url_for('delete_entry', entry_id=entry.entry_id) }}" class="btn btn-danger btn-sm">Delete</a>
                 </td>

@@ -21,15 +21,34 @@
                     <p><strong>Text:</strong> {{ text }}</p>
                     <p><strong>Label:</strong> {{ label }}</p>
                     <p><strong>Confidence:</strong> {{ confidence }}</p>
+
+                    <!-- Hate Speech Alert -->
+                    {% if label == 'Hate Speech' %}
+                        <div class="alert alert-danger mt-4" role="alert">
+                            ⚠️ Warning: The text contains hate speech!
+                        </div>
+
+                        <!-- JavaScript Alert for Admin -->
+                        {% if is_admin %}
+                            <script>
+                                alert('Admin Alert: The detected text contains hate speech!');
+                            </script>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-success mt-4" role="alert">
+                            ✅ The text does not contain hate speech.
+                        </div>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>
     </section>
 
-    <!-- Virtual Keyboard Container -->
+  <!-- Virtual Keyboard Container -->
     <section class="keyboard-section">
         <div id="keyboard" class="simple-keyboard"></div>
     </section>
+    <a href="{{ url_for('home') }}" class="btn btn-primary btn-sm">Back to Home</a>
 </main>
 
 {% endblock %}
@@ -77,4 +96,6 @@
         }
     });
 </script>
+
+
 {% endblock %}
