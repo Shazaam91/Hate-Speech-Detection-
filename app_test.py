@@ -137,6 +137,70 @@ class FlaskAppTest(unittest.TestCase):
         except TimeoutException:
             self.fail("Failed to login, submit text, or get results in time.")
 
+    def test_submit_feedback(self):
+        driver = self.driver
+        driver.get("http://127.0.0.1:5000/login")  # Replace with your login page URL
+
+        try:
+            # Step 1: Login Process
+            username_input = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.NAME, "username"))
+            )
+            password_input = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.NAME, "password"))
+            )
+            login_button = WebDriverWait(driver, 20).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))
+            )
+
+            # Enter login credentials
+            username_input.send_keys(os.getenv('REGISTER_USERNAME', 'test_user'))
+            password_input.send_keys(os.getenv('REGISTER_PASSWORD', 'Test_123'))
+            login_button.click()
+
+            # Step 2: Navigate to Manage Entries Page
+            WebDriverWait(driver, 20).until(
+                EC.url_contains("/index")  # Ensure redirected to index page or adjust URL if needed
+            )
+            manage_entries_link = WebDriverWait(driver, 20).until(
+                EC.element_to_be_clickable((By.XPATH, "//a[text()='Manage Entries']"))
+            )
+            manage_entries_link.click()
+
+            # Step 3: Open Feedback Submission Modal
+            entry_id = 54  # Replace with a valid entry ID if needed
+            submit_feedback_button = WebDriverWait(driver, 20).until(
+                EC.element_to_be_clickable((By.XPATH, f"//button[@data-target='#submitFeedbackModal{entry_id}']"))
+            )
+            submit_feedback_button.click()
+
+            # Step 4: Type and Submit Feedback in Modal
+            feedback_textarea = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.NAME, "feedback_text"))
+            )
+            submit_button_modal = WebDriverWait(driver, 20).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, "//button[@type='submit' and contains(text(), 'Submit Feedback')]"))
+            )
+
+            # Enter feedback and submit
+            feedback_text = "This is a test feedback."
+            feedback_textarea.send_keys(feedback_text)
+            submit_button_modal.click()
+
+            # Add a short wait to ensure the feedback submission is processed
+            WebDriverWait(driver, 10).until(
+                EC.invisibility_of_element_located((By.XPATH, f"//div[@id='submitFeedbackModal{entry_id}']"))
+            )
+
+            # Check if modal is closed and feedback was likely submitted
+            # If modal is no longer visible, assume feedback was submitted successfully
+            self.assertNotIn(f"submitFeedbackModal{entry_id}", driver.page_source)
+
+        except TimeoutException as e:
+            print("Timeout Exception:", e)  # Debugging line
+            self.fail("Failed to submit feedback: Element not found or not interactable in time.")
+
     def tearDown(self):
         self.driver.quit()
 
