@@ -205,10 +205,16 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        # Check if required form fields are present
+        if not all(k in request.form for k in ('username', 'password', 'role')):
+            flash('All fields are required.', 'danger')
+            return render_template('login.html'), 400  # Return 400 Bad Request with custom message
+
         username = request.form['username']
         password = request.form['password']
         role = request.form['role']
 
+        # Database connection and query
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
@@ -216,6 +222,7 @@ def login():
         cursor.close()
         conn.close()
 
+        # Validate user credentials
         if user and check_password_hash(user['password'], password) and user['role'] == role:
             session['user_id'] = user['user_id']
             session['username'] = user['username']
@@ -231,6 +238,7 @@ def login():
             flash('Invalid username, password, or role', 'danger')
 
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
